@@ -1,2 +1,3 @@
-var App = require('newbeely-nodejs');
-App.start( function(){});
+var App = require('../../newbeely');
+
+App.start( function(){});
