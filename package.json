@@ -1,6 +1,6 @@
 {
   "name": "newbeely-nodejs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,12 +21,12 @@
   },
   "homepage": "https://github.com/Gandalfull/newbeely-nodejs#readme",
   "dependencies": {
-    "async": "1.5.x",
+    "async": "x",
     "bearcat": "x",
     "crc32": "x",
-    "express": "4.x",
-    "mongoose": "3.8.x",
-    "redis": "2.x",
+    "express": "x",
+    "mongoose": "x",
+    "redis": "x",
     "underscore": "x",
     "pomelo-logger": "x",
     "pomelo-scheduler": "x",
