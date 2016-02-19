@@ -1,5 +1,5 @@
 {
-  "projectName" : "test-a",
+  "projectName" : "exampleProjectName",
   "components"  : {
     "dao-logs":{
       "bean": "mongooseComponent",
