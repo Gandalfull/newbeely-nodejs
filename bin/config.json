@@ -1,0 +1,14 @@
+{
+  "projectName" : "test-a",
+  "components"  : {
+    "dao-logs":{
+      "bean": "mongooseComponent",
+      "host": "115.159.70.101",
+      "pool": 1,
+      "port": 27000,
+      "user": "",
+      "password": "",
+      "dbname": "StarLog"
+    }
+  }
+}

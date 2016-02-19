@@ -20,7 +20,18 @@
     "url": "https://github.com/Gandalfull/newbeely-nodejs/issues"
   },
   "homepage": "https://github.com/Gandalfull/newbeely-nodejs#readme",
-  "dependencies":{
-  
+  "dependencies": {
+    "async": "1.5.x",
+    "bearcat": "x",
+    "crc32": "x",
+    "express": "4.x",
+    "mongoose": "3.8.x",
+    "redis": "2.x",
+    "underscore": "x",
+    "pomelo-logger": "x",
+    "pomelo-scheduler": "x",
+    "rangedate": "x",
+    "multer": "x",
+    "generic-pool": "x"
   }
 }
