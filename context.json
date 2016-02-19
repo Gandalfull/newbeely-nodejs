@@ -1,4 +1,4 @@
 {
   "name": "bearcat-root",
-  "beans": []
+  "scan": "lib"
 }
