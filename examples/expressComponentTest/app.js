@@ -7,6 +7,6 @@ App.start(__dirname, function () {
     var express = expressComponent.express;
     express.use(function (req, res) {
         res.statusCode = 200;
-        res.end();
+        res.send("Hello newbeely from expressComponent!");
     });
 });
