@@ -7,8 +7,8 @@ var program = require('commander'),
     mkdirp = require('mkdirp'),
     __ = require('underscore'),
     path = require('path'),
-    fs = require('fs');
-async = require('async');
+    fs = require('fs'),
+    async = require('async');
 
 var SupportComponentIndex = {
     '1': "httpComponent",
