@@ -8,6 +8,7 @@ var program = require('commander'),
     __ = require('underscore'),
     path = require('path'),
     fs = require('fs');
+async = require('async');
 
 var SupportComponentIndex = {
     '1': "httpComponent",
@@ -27,7 +28,7 @@ program.command('init [path]')
     .action(function (ph) {
         ph = ph || process.cwd();
         console.log('Create a new application by components:\n\r' + JSON.stringify(SupportComponentIndex, 0, 4));
-        prompt('Please select component by index=name index=name:\n  Examples: 1=api 2=dao-logs', function (msg) {
+        prompt('Please select component by index=name index=name:\n  Examples: 1=api 2=dao-logs OR 1:api 2:dao-logs', function (msg) {
             var components = msg.trim().split(/[\s]/);
             components = __.compact(components);
             if (components.length == 0) {
@@ -55,17 +56,51 @@ program.command('init [path]')
                 "development": {}, "production": {}
             };
             var componentConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../template/config.template')));
-            for (var i in realComponents) {
-                serviceConfigs.development[i] = componentConfig[SupportComponentIndex[realComponents[i]]];
-                serviceConfigs.production[i] = componentConfig[SupportComponentIndex[realComponents[i]]];
-            }
-            console.log('The project config is:\n' + JSON.stringify(serviceConfigs, 0, 4));
-            confirm('Do it(yes/no):', function (doit) {
-                process.stdin.destroy();
-                if (!doit) {
-                    return;
+            async.eachOfSeries(realComponents, function (v, k, cb) {
+                var realConfig = copy_json_object(componentConfig[SupportComponentIndex[v]]);
+                console.log("Initialise " + k + " by " + realConfig.bean);
+                if (realConfig.bean == "httpComponent" || realConfig.bean == "expressComponent") {
+                    async.waterfall([
+                        function (cb) {
+                            prompt('Please input host (default:localhost):', function (msg) {
+                                if (msg.trim() != "") {
+                                    realConfig.host = msg.trim();
+                                }
+                                cb();
+                            });
+                        }, function (cb) {
+                            prompt('Please input port (default:none):', function (msg) {
+                                if (msg.trim() != "") {
+                                    realConfig.port = parseInt(msg.trim());
+                                }
+                                cb();
+                            });
+                        }
+                    ], cb);
                 }
-                CopyFiles(ph, serviceConfigs);
+                if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
+                    async.waterfall([
+                        function( cb ){
+                            prompt('Please input database name (default:un-setting):', function (msg) {
+                                if (msg.trim() != "") {
+                                    realConfig.dbname = msg.trim();
+                                }
+                                cb();
+                            });
+                        }
+                    ],cb);
+                }
+                serviceConfigs.development[k] = realConfig;
+                serviceConfigs.production[k] = realConfig;
+            }, function () {
+                console.log('The project config is:\n' + JSON.stringify(serviceConfigs, 0, 4));
+                confirm('Do it(yes/no):', function (doit) {
+                    process.stdin.destroy();
+                    if (!doit) {
+                        return;
+                    }
+                    CopyFiles(ph, serviceConfigs);
+                });
             });
         });
     });
@@ -113,7 +148,7 @@ function CopyFiles(ph, configs) {
     fs.writeFileSync(path.join(ph, 'logs/.keepme'), JSON.stringify(true, 0, 4));
 
     mkdir(path.join(ph, 'config'));
-    fs.writeFileSync(path.join(ph, 'config/service.json'), JSON.stringify(configs, 0, 4));
+    fs.writeFileSync(path.join(ph, 'config/services.json'), JSON.stringify(configs, 0, 4));
     copy_file(path.join(__dirname, '../template/log4js.default'), path.join(ph, 'config/log4js.json'));
 
     mkdir(path.join(ph, 'test'));
@@ -141,7 +176,6 @@ function prompt(msg, fn) {
     process.stdin.setEncoding('ascii');
     process.stdin.once('data', function (data) {
         fn(data);
-
     }).resume();
 }
 
@@ -154,7 +188,6 @@ function prompt(msg, fn) {
 function confirm(msg, fn) {
     prompt(msg, function (val) {
         fn(/^ *y(es)?/i.test(val));
-
     });
 }
 /**
@@ -218,4 +251,12 @@ function mkdir(path, fn) {
             fn();
         }
     });
+}
+
+function copy_json_object( obj ){
+    var temp = {};
+    for( var i in obj ){
+        temp[i] = obj[i];
+    }
+    return temp;
 }
