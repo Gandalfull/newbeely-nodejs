@@ -33,3 +33,4 @@
 ### Create project (on current direction)
 
     newbeely init
+    newbeely init project-name
