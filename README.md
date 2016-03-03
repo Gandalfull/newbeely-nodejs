@@ -1,4 +1,4 @@
-# newbeely-nodejs
+# newbeely
 
     简单易用的轻量级nodejs服务框架.
     框架简单到只有组件逻辑,不同的组件提供不同的服务,使用外部的配置文件(只有一个配置文件)方便的组合成一个完整的服务框架.
@@ -28,7 +28,7 @@
         
 ### Install
 
-    npm install -g
+    npm install newbeely-nodejs -g
 
 ### Create project (on current direction)
 
