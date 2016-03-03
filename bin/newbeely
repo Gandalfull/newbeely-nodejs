@@ -249,7 +249,7 @@ function mkdir(path, fn) {
         if (err) {
             throw err;
         }
-        console.log('   create : '.green + path);
+        console.log('   create : ' + path);
         if (typeof fn === 'function') {
             fn();
         }
