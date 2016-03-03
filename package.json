@@ -32,6 +32,9 @@
     "pomelo-scheduler": "x",
     "rangedate": "x",
     "multer": "x",
-    "generic-pool": "x"
+    "generic-pool": "x",
+
+    "commander": "2.0.0",
+    "mkdirp": "0.3.3"
   }
 }

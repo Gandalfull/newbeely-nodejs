@@ -1,0 +1,29 @@
+{
+  "httpComponent": {
+    "bean":"httpComponent","host": "localhost", "port": "none", "ssl": false, "protocol": "", "method": "get|post"
+  },
+  "expressComponent": {
+    "bean":"expressComponent","host": "localhost", "port": "none", "ssl": false, "protocol": "", "method": "get|post"
+  },
+  "mongooseComponent": {
+    "bean":"mongooseComponent","host": "127.0.0.1", "port": 27017, "user": "", "password": "", "dbname": "un-setting", "pool": 1
+  },
+  "mongooseRedisCacheComponent": {
+    "bean":"mongooseRedisCacheComponent","host": "127.0.0.1", "port": 27017, "user": "", "password": "", "dbname": "un-setting", "pool": 1,
+    "redis": {
+      "host": "127.0.0.1", "port": 6379, "pass": ""
+    }
+  },
+  "redisComponent":{
+    "bean":"redisComponent","host": "127.0.0.1", "port": 6379, "user": "", "password": "","pool":1
+  },
+  "rpcComponent":{
+    "bean":"rpcComponent","host": "127.0.0.1", "port": 6379, "user": "", "password": ""
+  },
+  "websocketComponent":{
+    "bean":"websocketComponent","host": "127.0.0.1", "port": 6379, "user": "", "password": ""
+  },
+  "socketioComponent":{
+    "bean":"socketioComponent","host": "127.0.0.1", "port": 6379, "user": "", "password": ""
+  }
+}

@@ -1,3 +1,0 @@
-node package.js
-
-pause
