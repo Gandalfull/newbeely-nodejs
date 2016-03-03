@@ -16,9 +16,9 @@ var SupportComponentIndex = {
     '3': 'mongooseComponent',
     '4': 'mongooseRedisCacheComponent',
     '5': 'redisComponent',
-    '6': 'rpcComponent',
-    '7': 'websocketComponent',
-    '8': 'socketioComponent'
+    '6': 'rpcComponent(un-support)',
+    '7': 'websocketComponent(un-support)',
+    '8': 'socketioComponent(un-support)'
 };
 
 program.version(require('../package.json').version);
@@ -26,9 +26,12 @@ program.version(require('../package.json').version);
 program.command('init [path]')
     .description('create a new application')
     .action(function (ph) {
-        ph = ph || process.cwd();
+        ph = ph ? path.join(process.cwd(),ph) : process.cwd();
+        if(!fs.existsSync(ph)){
+          mkdir(ph);
+        }
         console.log('Create a new application by components:\n\r' + JSON.stringify(SupportComponentIndex, 0, 4));
-        prompt('Please select component by index=name index=name:\n  Examples: 1=api 2=dao-logs OR 1:api 2:dao-logs', function (msg) {
+        prompt('Please select component by index=name index=name:\n  Examples: 1=api-http 2=web-server 3=dao-logs OR 1:api 2:web-server 3:dao-logs', function (msg) {
             var components = msg.trim().split(/[\s]/);
             components = __.compact(components);
             if (components.length == 0) {
