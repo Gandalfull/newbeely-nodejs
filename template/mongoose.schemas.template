@@ -2,7 +2,7 @@ var Mongoose = require('mongoose');
 
 var Table = {
     createTime: {type: Date, index: -1},
-    data: {type: Schema.Types.Mixed, default: {}},
+    data: {type: Mongoose.Schema.Types.Mixed, default: {}},
     uid: {type: String, default: ""}
 };
 
