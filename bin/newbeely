@@ -26,126 +26,138 @@ program.version(require('../package.json').version);
 program.command('init [path]')
     .description('create a new application')
     .action(function (ph) {
-        ph = ph ? path.join(process.cwd(),ph) : process.cwd();
-        if(!fs.existsSync(ph)){
-          mkdir(ph);
+        ph = ph ? path.join(process.cwd(), ph) : process.cwd();
+        if (!fs.existsSync(ph)) {
+            mkdir(ph);
         }
-        console.log('Create a new application by components:\n\r' + JSON.stringify(SupportComponentIndex, 0, 4));
-        prompt('Please select component by index=name index=name:\n  Examples: 1=api-http 2=web-server 3=dao-logs OR 1:api 2:web-server 3:dao-logs', function (msg) {
-            var components = msg.trim().split(/[\s]/);
-            components = __.compact(components);
-            if (components.length == 0) {
-                console.log('None Component from input data!');
-            }
-            var realComponents = {};
-            for (var i in components) {
-                var component = components[i].split(/[:,=]/);
-                component = __.compact(component);
-                if (component.length != 2) {
-                    console.log('Input data has error by:', components[i]);
-                    return;
-                }
-                if (!SupportComponentIndex[component[0]]) {
-                    console.log('Non-support component id by:' + component[0]);
-                    return;
-                }
-                if (realComponents[component[1]]) {
-                    console.log('Input data has error by repeated name:' + component[1]);
-                    return;
-                }
-                realComponents[component[1]] = component[0];
-            }
-            var serviceConfigs = {
-                "development": {}, "production": {}
+        SelectComponent(function (components) {
+            var projectConfig = {
+                "development": {},
+                "production": {}
             };
-            var componentConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../template/config.template')));
-            async.eachOfSeries(realComponents, function (v, k, cb) {
-                var realConfig = copy_json_object(componentConfig[SupportComponentIndex[v]]);
-                console.log("Initialise " + k + " by " + realConfig.bean);
-                if (realConfig.bean == "httpComponent" || realConfig.bean == "expressComponent") {
-                    async.waterfall([
-                        function (cb) {
-                            prompt('Please input host (default:localhost):', function (msg) {
-                                if (msg.trim() != "") {
-                                    realConfig.host = msg.trim();
-                                }
-                                cb();
-                            });
-                        }, function (cb) {
-                            prompt('Please input port (default:none):', function (msg) {
-                                if (msg.trim() != "") {
-                                    realConfig.port = parseInt(msg.trim());
-                                }
-                                cb();
-                            });
-                        }
-                    ], cb);
-                }
-                if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
-                    async.waterfall([
-                        function( cb ){
-                            prompt('Please input database name (default:un-setting):', function (msg) {
-                                if (msg.trim() != "") {
-                                    realConfig.dbname = msg.trim();
-                                }
-                                cb();
-                            });
-                        }
-                    ],cb);
-                }
-                serviceConfigs.development[k] = realConfig;
-                serviceConfigs.production[k] = realConfig;
-            }, function () {
-                console.log('The project config is:\n' + JSON.stringify(serviceConfigs, 0, 4));
-                confirm('Do it(yes/no):', function (doit) {
-                    process.stdin.destroy();
-                    if (!doit) {
-                        return;
-                    }
-                    CopyFiles(ph, serviceConfigs);
+            async.eachOfSeries(components, function (supportIndex, component, cb) {
+                SetComponentOption(component, supportIndex, function (reaConfig) {
+                    projectConfig.development[component] = reaConfig;
+                    projectConfig.production[component] = reaConfig;
+                    cb();
                 });
+            }, function () {
+                InitProject(ph, projectConfig);
+                InitComponent(ph, projectConfig.development);
+                process.stdio.close();
+            });
+        });
+    });
+
+program.command('add')
+    .description('add a new component to this project')
+    .action(function () {
+        var ph = process.cwd();
+        SelectComponent(function (components) {
+            var projectConfig = JSON.parse(fs.readFileSync(path.join(ph, 'config/services.json')).toString());
+            async.eachOfSeries(components, function (supportIndex, component, cb) {
+                if (projectConfig[component]) {
+                    cb();
+                    return;
+                }
+                SetComponentOption(component, supportIndex, function (reaConfig) {
+                    projectConfig.development[component] = reaConfig;
+                    projectConfig.production[component] = reaConfig;
+                    cb();
+                });
+            }, function () {
+                InitProject(ph, projectConfig);
+                InitComponent(ph, projectConfig.development);
+                process.stdio.close();
             });
         });
     });
 
 program.parse(process.argv);
 
+function SelectComponent(fn) {
+    console.log('Support components:\n\r' + JSON.stringify(SupportComponentIndex, 0, 4));
+    prompt('Please select component by index=name index=name:\n  Examples: 1=api-http 2=web-server 3=dao-logs OR 1:api 2:web-server 3:dao-logs', function (msg) {
+        var components = msg.trim().split(/[\s]/);
+        components = __.compact(components);
+        if (components.length == 0) {
+            console.log('None Component from input data!');
+        }
+        var realComponents = {};
+        for (var i in components) {
+            var component = components[i].split(/[:,=]/);
+            component = __.compact(component);
+            if (component.length != 2) {
+                console.log('Input data has error by:', components[i]);
+                return;
+            }
+            if (!SupportComponentIndex[component[0]]) {
+                console.log('Non-support component id by:' + component[0]);
+                return;
+            }
+            if (realComponents[component[1]]) {
+                console.log('Input data has error by repeated name:' + component[1]);
+                return;
+            }
+            realComponents[component[1]] = component[0];
+        }
+        fn(realComponents);
+    });
+}
 
-function CopyFiles(ph, configs) {
+function SetComponentOption(component, InputIndex, fn) {
+    var componentConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../template/config.template')));
+    var realConfig = copy_json_object(componentConfig[SupportComponentIndex[InputIndex]]);
+    console.log("Initialise " + component + " by " + realConfig.bean);
+    if (realConfig.bean == "httpComponent" || realConfig.bean == "expressComponent") {
+        async.waterfall([
+            function (cb) {
+                prompt('Please input host (default:' + realConfig.host + '):', function (msg) {
+                    if (msg.trim() != "") {
+                        realConfig.host = msg.trim();
+                    }
+                    cb();
+                });
+            }, function (cb) {
+                prompt('Please input port (default:' + realConfig.port + '):', function (msg) {
+                    if (msg.trim() != "") {
+                        realConfig.port = parseInt(msg.trim());
+                    }
+                    cb();
+                });
+            }
+        ], function () {
+            fn(realConfig);
+        });
+    }
+    if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
+        async.waterfall([
+            function (cb) {
+                prompt('Please input database name (default:' + realConfig.dbname + '):', function (msg) {
+                    if (msg.trim() != "") {
+                        realConfig.dbname = msg.trim();
+                    }
+                    cb();
+                });
+            }
+        ], function () {
+            fn(realConfig);
+        });
+    }
+}
+
+function InitProject(ph, configs) {
     var paths = ph.split(/[/\\]/);
     var projectName = paths[paths.length - 1];
-    fs.writeFileSync(path.join(ph, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/', 'context.bearcat')).toString().replace('$', projectName));
-    fs.writeFileSync(path.join(ph, 'app.json'), fs.readFileSync(path.join(__dirname, '../template/', 'pm2.config')).toString().replace('$', projectName));
+    fs.writeFileSync(path.join(ph, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/context.bearcat')).toString().replace('$', projectName));
+    fs.writeFileSync(path.join(ph, 'app.json'), fs.readFileSync(path.join(__dirname, '../template/pm2.config')).toString().replace('$', projectName));
     copy_file(path.join(__dirname, '../template/pm2.start'), path.join(ph, 'start'));
     copy_file(path.join(__dirname, '../template/pm2.stop'), path.join(ph, 'stop'));
 
-    fs.writeFileSync(path.join(ph, 'package.json'), fs.readFileSync(path.join(__dirname, '../template/', 'package.npm')).toString().replace('$', projectName));
+    fs.writeFileSync(path.join(ph, 'package.json'), fs.readFileSync(path.join(__dirname, '../template/package.npm')).toString().replace('$', projectName));
     copy_file(path.join(__dirname, '../template/app.default'), path.join(ph, 'app.js'));
 
     mkdir(path.join(ph, 'app'));
-    for (var i in configs.development) {
-        mkdir(path.join(ph, 'app', i));
-        fs.writeFileSync(path.join(ph, 'app', i, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/', 'context.bearcat')).toString().replace('$', "component-" + i));
-        var component = configs.development[i].bean;
-        if (component == 'httpComponent') {
-            mkdir(path.join(ph, 'app', i, 'get'));
-            mkdir(path.join(ph, 'app', i, 'post'));
-            copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'get', 'hello.js'));
-            copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'post', 'hello.js'));
-        }
-
-        if (component == 'expressComponent') {
-            mkdir(path.join(ph, 'app', i, 'routes'));
-            copy_file(path.join(__dirname, '../template/express.route.template'), path.join(ph, 'app', i, 'routes', 'hello.js'));
-
-            fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/', 'app.express')).toString());
-        }
-
-        if (component == 'mongooseComponent' || component == 'mongooseRedisCacheComponent') {
-            mkdir(path.join(ph, 'app', i, 'schemas'));
-            copy_file(path.join(__dirname, '../template/mongoose.schemas.template'), path.join(ph, 'app', i, 'schemas', 'examples.js'));
-        }
-    }
 
     mkdir(path.join(ph, 'logs'));
     fs.writeFileSync(path.join(ph, 'logs/.keepme'), JSON.stringify(true, 0, 4));
@@ -162,6 +174,35 @@ function CopyFiles(ph, configs) {
 
     mkdir(path.join(ph, 'docs'));
     fs.writeFileSync(path.join(ph, 'docs/.keepme'), JSON.stringify(true, 0, 4));
+}
+
+function InitComponent(ph, components) {
+    for (var i in components) {
+        if (fs.existsSync(path.join(ph, 'app', i))) {
+            continue;
+        }
+        mkdir(path.join(ph, 'app', i));
+        fs.writeFileSync(path.join(ph, 'app', i, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/context.bearcat')).toString().replace('$', "component-" + i));
+        var component = components[i].bean;
+        if (component == 'httpComponent') {
+            mkdir(path.join(ph, 'app', i, 'get'));
+            mkdir(path.join(ph, 'app', i, 'post'));
+            copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'get', 'hello.js'));
+            copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'post', 'hello.js'));
+        }
+
+        if (component == 'expressComponent') {
+            mkdir(path.join(ph, 'app', i, 'routes'));
+            copy_file(path.join(__dirname, '../template/express.route.template'), path.join(ph, 'app', i, 'routes', 'hello.js'));
+
+            fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/app.express')).toString());
+        }
+
+        if (component == 'mongooseComponent' || component == 'mongooseRedisCacheComponent') {
+            mkdir(path.join(ph, 'app', i, 'schemas'));
+            copy_file(path.join(__dirname, '../template/mongoose.schemas.template'), path.join(ph, 'app', i, 'schemas', 'examples.js'));
+        }
+    }
 }
 
 /**
@@ -203,37 +244,6 @@ function abort(str) {
     process.exit(1);
 }
 
-/**
- * Copy template files to project.
- *
- * @param {String} origin
- * @param {String} target
- */
-function copy(origin, target) {
-    if (!fs.existsSync(origin)) {
-        abort(origin + 'does not exist.');
-    }
-    if (!fs.existsSync(target)) {
-        mkdir(target);
-        console.log('   create : '.green + target);
-    }
-    fs.readdir(origin, function (err, datalist) {
-        if (err) {
-            abort(FILEREAD_ERROR);
-        }
-        for (var i = 0; i < datalist.length; i++) {
-            var oCurrent = path.resolve(origin, datalist[i]);
-            var tCurrent = path.resolve(target, datalist[i]);
-            if (fs.statSync(oCurrent).isFile()) {
-                fs.writeFileSync(tCurrent, fs.readFileSync(oCurrent, ''), '');
-                console.log('   create : '.green + tCurrent);
-            } else if (fs.statSync(oCurrent).isDirectory()) {
-                copy(oCurrent, tCurrent);
-            }
-        }
-    });
-}
-
 function copy_file(origin, target) {
     fs.writeFileSync(target, fs.readFileSync(origin).toString());
 }
@@ -256,9 +266,9 @@ function mkdir(path, fn) {
     });
 }
 
-function copy_json_object( obj ){
+function copy_json_object(obj) {
     var temp = {};
-    for( var i in obj ){
+    for (var i in obj) {
         temp[i] = obj[i];
     }
     return temp;
