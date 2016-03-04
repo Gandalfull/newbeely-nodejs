@@ -44,7 +44,7 @@ program.command('init [path]')
             }, function () {
                 InitProject(ph, projectConfig);
                 InitComponent(ph, projectConfig.development);
-                process.stdio.close();
+                process.stdin.destroy();
             });
         });
     });
@@ -68,7 +68,7 @@ program.command('add')
             }, function () {
                 InitProject(ph, projectConfig);
                 InitComponent(ph, projectConfig.development);
-                process.stdio.close();
+                process.stdin.destroy();
             });
         });
     });
