@@ -42,9 +42,16 @@ program.command('init [path]')
                     cb();
                 });
             }, function () {
-                InitProject(ph, projectConfig);
-                InitComponent(ph, projectConfig.development);
-                process.stdin.destroy();
+                console.log('Selected component configs:\n' + JSON.stringify(projectConfig.development, 0, 4));
+                confirm('Do you want to continue(yes/no)',function( b ){
+                    if( !b ){
+                        abort('command abort!!!');
+                        return;
+                    }
+                    InitProject(ph, projectConfig);
+                    InitComponent(ph, projectConfig.development);
+                    process.stdin.destroy();
+                });
             });
         });
     });
@@ -66,9 +73,16 @@ program.command('add')
                     cb();
                 });
             }, function () {
-                InitProject(ph, projectConfig);
-                InitComponent(ph, projectConfig.development);
-                process.stdin.destroy();
+                console.log('Selected component configs:\n' + JSON.stringify(projectConfig.development, 0, 4));
+                confirm('Do you want to continue(yes/no)',function( b ){
+                    if( !b ){
+                        abort('command abort!!!');
+                        return;
+                    }
+                    InitProject(ph, projectConfig);
+                    InitComponent(ph, projectConfig.development);
+                    process.stdin.destroy();
+                });
             });
         });
     });
@@ -81,7 +95,7 @@ function SelectComponent(fn) {
         var components = msg.trim().split(/[\s]/);
         components = __.compact(components);
         if (components.length == 0) {
-            console.log('None Component from input data!');
+            abort('None Component from input data!');
         }
         var realComponents = {};
         for (var i in components) {
@@ -93,7 +107,6 @@ function SelectComponent(fn) {
             }
             if (!SupportComponentIndex[component[0]]) {
                 console.log('Non-support component id by:' + component[0]);
-                return;
             }
             if (realComponents[component[1]]) {
                 console.log('Input data has error by repeated name:' + component[1]);
@@ -164,7 +177,8 @@ function InitProject(ph, configs) {
 
     mkdir(path.join(ph, 'config'));
     fs.writeFileSync(path.join(ph, 'config/services.json'), JSON.stringify(configs, 0, 4));
-    copy_file(path.join(__dirname, '../template/log4js.default'), path.join(ph, 'config/log4js.json'));
+    fs.writeFileSync(path.join(ph, 'config/log4js.json'), fs.readFileSync(path.join(__dirname, '../template/log4js.default')).toString().replace(/PROJECT-NAME/g, projectName));
+    //copy_file(path.join(__dirname, '../template/log4js.default'), path.join(ph, 'config/log4js.json'));
 
     mkdir(path.join(ph, 'test'));
     fs.writeFileSync(path.join(ph, 'test/.keepme'), JSON.stringify(true, 0, 4));

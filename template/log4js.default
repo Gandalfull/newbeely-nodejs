@@ -12,7 +12,17 @@
       },
       "backups": 99,
       "category": "newbeely"
-    }
+    },
+        {
+          "type": "file",
+          "filename": "${opts:base}/logs/PROJECT-NAME.log",
+          "maxLogSize": 10485760,
+          "layout": {
+            "type": "basic"
+          },
+          "backups": 99,
+          "category": "PROJECT-NAME"
+        }
   ],
   "levels": {
   },
