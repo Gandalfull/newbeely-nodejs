@@ -4,9 +4,9 @@ var Encrypt = require('../../lib/utils/encrypt');
 describe("encrypt test!", function () {
     before('init bearcat', function (done) {
         Bearcat.createApp();
-        Bearcat.module(JSON.stringify(Encrypt), Encrypt.func);
+        Bearcat.module(Encrypt,Encrypt.func);
         Bearcat.use([Encrypt.id]);
-        Bearcat.start(function () {
+        Bearcat.start(function(){
             done();
         });
     });
@@ -14,7 +14,7 @@ describe("encrypt test!", function () {
         var test = "Hello world!";
         console.log(Bearcat.getBean('encrypt'));
         var md5text = Bearcat.getBean('encrypt').md5(test, "hex");
-        console.log(test, "(md5)", md5text, "\n");
+        console.log(test, "(md5)", md5text,"\n");
         done();
     });
 });
