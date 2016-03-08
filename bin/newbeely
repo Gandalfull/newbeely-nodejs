@@ -142,7 +142,7 @@ function SetComponentOption(component, InputIndex, fn) {
         ], function () {
             fn(realConfig);
         });
-    }
+    }else
     if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
         async.waterfall([
             function (cb) {
@@ -156,6 +156,8 @@ function SetComponentOption(component, InputIndex, fn) {
         ], function () {
             fn(realConfig);
         });
+    }else {
+      fn(realConfig);
     }
 }
 
