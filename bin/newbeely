@@ -173,7 +173,7 @@ function InitProject(ph, configs) {
     mkdir(path.join(ph, 'app'));
 
     mkdir(path.join(ph, 'logs'));
-    fs.writeFileSync(path.join(ph, 'logs/.keepme'), JSON.stringify(true, 0, 4));
+    fs.writeFileSync(path.join(ph, 'logs/hold.keepme'), JSON.stringify(true, 0, 4));
 
     mkdir(path.join(ph, 'config'));
     fs.writeFileSync(path.join(ph, 'config/services.json'), JSON.stringify(configs, 0, 4));
@@ -181,13 +181,13 @@ function InitProject(ph, configs) {
     //copy_file(path.join(__dirname, '../template/log4js.default'), path.join(ph, 'config/log4js.json'));
 
     mkdir(path.join(ph, 'test'));
-    fs.writeFileSync(path.join(ph, 'test/.keepme'), JSON.stringify(true, 0, 4));
+    fs.writeFileSync(path.join(ph, 'test/hold.keepme'), JSON.stringify(true, 0, 4));
 
     mkdir(path.join(ph, 'pids'));
-    fs.writeFileSync(path.join(ph, 'pids/.keepme'), JSON.stringify(true, 0, 4));
+    fs.writeFileSync(path.join(ph, 'pids/hold.keepme'), JSON.stringify(true, 0, 4));
 
     mkdir(path.join(ph, 'docs'));
-    fs.writeFileSync(path.join(ph, 'docs/.keepme'), JSON.stringify(true, 0, 4));
+    fs.writeFileSync(path.join(ph, 'docs/hold.keepme'), JSON.stringify(true, 0, 4));
 }
 
 function InitComponent(ph, components) {
