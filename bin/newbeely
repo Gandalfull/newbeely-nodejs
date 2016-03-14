@@ -196,7 +196,7 @@ function InitProject(ph, configs) {
 }
 
 function InitComponent(ph, components) {
-    async.eachOfSeries(components, function (component, name) {
+    async.eachOfSeries(components, function (component, name, cb) {
         if (fs.existsSync(path.join(ph, 'app', name))) {
             return;
         }
@@ -205,11 +205,20 @@ function InitComponent(ph, components) {
         });
         var component = component.bean;
         if (component == 'httpComponent') {
-            mkdir(path.join(ph, 'app', name, 'get'), function () {
-                copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'get', 'hello.js'));
-            });
-            mkdir(path.join(ph, 'app', name, 'post'), function () {
-                copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'post', 'hello.js'));
+            async.waterfall([
+                function (cb) {
+                    mkdir(path.join(ph, 'app', name, 'get'), function () {
+                        copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'get', 'hello.js'));
+                        cb();
+                    });
+                }, function (cb) {
+                    mkdir(path.join(ph, 'app', name, 'post'), function () {
+                        copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'post', 'hello.js'));
+                        cb();
+                    });
+                }
+            ], function () {
+                cb();
             });
         }
 
@@ -219,11 +228,13 @@ function InitComponent(ph, components) {
             });
 
             fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/app.express')).toString());
+            cb();
         }
 
         if (component == 'mongooseComponent' || component == 'mongooseRedisCacheComponent') {
             mkdir(path.join(ph, 'app', name, 'schemas'), function () {
                 copy_file(path.join(__dirname, '../template/mongoose.schemas.template'), path.join(ph, 'app', name, 'schemas', 'examples.js'));
+                cb();
             });
         }
     });
