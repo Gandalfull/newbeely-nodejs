@@ -43,8 +43,8 @@ program.command('init [path]')
                 });
             }, function () {
                 console.log('Selected component configs:\n' + JSON.stringify(projectConfig.development, 0, 4));
-                confirm('Do you want to continue(yes/no)',function( b ){
-                    if( !b ){
+                confirm('Do you want to continue(yes/no)', function (b) {
+                    if (!b) {
                         abort('command abort!!!');
                         return;
                     }
@@ -74,8 +74,8 @@ program.command('add')
                 });
             }, function () {
                 console.log('Selected component configs:\n' + JSON.stringify(projectConfig.development, 0, 4));
-                confirm('Do you want to continue(yes/no)',function( b ){
-                    if( !b ){
+                confirm('Do you want to continue(yes/no)', function (b) {
+                    if (!b) {
                         abort('command abort!!!');
                         return;
                     }
@@ -142,8 +142,7 @@ function SetComponentOption(component, InputIndex, fn) {
         ], function () {
             fn(realConfig);
         });
-    }else
-    if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
+    } else if (realConfig.bean == "mongooseComponent" || realConfig.bean == "mongooseRedisCacheComponent") {
         async.waterfall([
             function (cb) {
                 prompt('Please input database name (default:' + realConfig.dbname + '):', function (msg) {
@@ -156,8 +155,8 @@ function SetComponentOption(component, InputIndex, fn) {
         ], function () {
             fn(realConfig);
         });
-    }else {
-      fn(realConfig);
+    } else {
+        fn(realConfig);
     }
 }
 
@@ -174,60 +173,60 @@ function InitProject(ph, configs) {
 
     mkdir(path.join(ph, 'app'));
 
-    mkdir(path.join(ph, 'logs'),function(){
-      fs.writeFileSync(path.join(ph, 'logs/.keepme'), JSON.stringify(true, 0, 4));
+    mkdir(path.join(ph, 'logs'), function () {
+        fs.writeFileSync(path.join(ph, 'logs/.keepme'), JSON.stringify(true, 0, 4));
     });
 
-    mkdir(path.join(ph, 'config'),function(){
-      fs.writeFileSync(path.join(ph, 'config/services.json'), JSON.stringify(configs, 0, 4));
-      fs.writeFileSync(path.join(ph, 'config/log4js.json'), fs.readFileSync(path.join(__dirname, '../template/log4js.default')).toString().replace(/PROJECT-NAME/g, projectName));
+    mkdir(path.join(ph, 'config'), function () {
+        fs.writeFileSync(path.join(ph, 'config/services.json'), JSON.stringify(configs, 0, 4));
+        fs.writeFileSync(path.join(ph, 'config/log4js.json'), fs.readFileSync(path.join(__dirname, '../template/log4js.default')).toString().replace(/PROJECT-NAME/g, projectName));
     });
 
-    mkdir(path.join(ph, 'test'),function(){
-      fs.writeFileSync(path.join(ph, 'test/.keepme'), JSON.stringify(true, 0, 4));
+    mkdir(path.join(ph, 'test'), function () {
+        fs.writeFileSync(path.join(ph, 'test/.keepme'), JSON.stringify(true, 0, 4));
     });
 
-    mkdir(path.join(ph, 'pids'),function(){
-      fs.writeFileSync(path.join(ph, 'pids/.keepme'), JSON.stringify(true, 0, 4));
+    mkdir(path.join(ph, 'pids'), function () {
+        fs.writeFileSync(path.join(ph, 'pids/.keepme'), JSON.stringify(true, 0, 4));
     });
 
-    mkdir(path.join(ph, 'docs'),function(){
-      fs.writeFileSync(path.join(ph, 'docs/.keepme'), JSON.stringify(true, 0, 4));
+    mkdir(path.join(ph, 'docs'), function () {
+        fs.writeFileSync(path.join(ph, 'docs/.keepme'), JSON.stringify(true, 0, 4));
     });
 }
 
 function InitComponent(ph, components) {
-    for (var i in components) {
-        if (fs.existsSync(path.join(ph, 'app', i))) {
-            continue;
+    async.eachOfSeries(components, function (component, name) {
+        if (fs.existsSync(path.join(ph, 'app', name))) {
+            return;
         }
-        mkdir(path.join(ph, 'app', i),function(){
-          fs.writeFileSync(path.join(ph, 'app', i, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/context.bearcat')).toString().replace('$', "component-" + i));
+        mkdir(path.join(ph, 'app', name), function () {
+            fs.writeFileSync(path.join(ph, 'app', name, 'context.json'), fs.readFileSync(path.join(__dirname, '../template/context.bearcat')).toString().replace('$', "component-" + name));
         });
-        var component = components[i].bean;
+        var component = component.bean;
         if (component == 'httpComponent') {
-            mkdir(path.join(ph, 'app', i, 'get'),function(){
-              copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'get', 'hello.js'));
+            mkdir(path.join(ph, 'app', name, 'get'), function () {
+                copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'get', 'hello.js'));
             });
-            mkdir(path.join(ph, 'app', i, 'post'),function(){
-              copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', i, 'post', 'hello.js'));
+            mkdir(path.join(ph, 'app', name, 'post'), function () {
+                copy_file(path.join(__dirname, '../template/http.route.template'), path.join(ph, 'app', name, 'post', 'hello.js'));
             });
         }
 
         if (component == 'expressComponent') {
-            mkdir(path.join(ph, 'app', i, 'routes'),function(){
-              copy_file(path.join(__dirname, '../template/express.route.template'), path.join(ph, 'app', i, 'routes', 'hello.js'));
+            mkdir(path.join(ph, 'app', name, 'routes'), function () {
+                copy_file(path.join(__dirname, '../template/express.route.template'), path.join(ph, 'app', name, 'routes', 'hello.js'));
             });
 
             fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/app.express')).toString());
         }
 
         if (component == 'mongooseComponent' || component == 'mongooseRedisCacheComponent') {
-            mkdir(path.join(ph, 'app', i, 'schemas'),function(){
-              copy_file(path.join(__dirname, '../template/mongoose.schemas.template'), path.join(ph, 'app', i, 'schemas', 'examples.js'));
+            mkdir(path.join(ph, 'app', name, 'schemas'), function () {
+                copy_file(path.join(__dirname, '../template/mongoose.schemas.template'), path.join(ph, 'app', name, 'schemas', 'examples.js'));
             });
         }
-    }
+    });
 }
 
 /**
