@@ -19,7 +19,14 @@ module.exports = function () {
     });
 }
 function Hello() {
+    var client = Bearcat.getBean('tcp-client');
+    client.connect();
 
+    client.on('connected', function () {
+        client.socket.send(0, "hello world", "utf8", function () {
+            console.log("发送数据完成!");
+        });
+    });
 }
 
 /**
@@ -29,6 +36,7 @@ function Hello() {
  * @param next
  */
 Hello.prototype.handle = function (msg, next) {
+
     next(null, "hello newbeely!");
 }
 
