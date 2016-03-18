@@ -40,7 +40,7 @@ function Hello() {
  * @param next
  */
 Hello.prototype.handle = function (msg, next) {
-    this.client.socket.send(0, JSON.stringify({"id": "1"}), "utf8", function () {
+    this.client.socket.send(0, "hello", JSON.stringify({"id": "1"}), "utf8", function () {
         console.log("发送消息完成!");
     });
     next(null, "hello newbeely!");
