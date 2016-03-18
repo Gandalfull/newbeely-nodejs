@@ -19,13 +19,17 @@ module.exports = function () {
     });
 }
 function Hello() {
-    var client = Bearcat.getBean('tcp-client');
-    client.connect();
+    this.client = Bearcat.getBean('tcp-client');
+    this.client.connect();
 
-    client.on('connected', function () {
-        client.socket.send(0, "hello world", "utf8", function () {
-            console.log("发送数据完成!");
-        });
+    this.client.on('connected', function () {
+        console.log("tcp 连接完成!");
+    });
+    this.client.socket.on('close', function () {
+        console.log("tcp 连接断开!");
+    });
+    this.client.socket.on('message', function () {
+        console.log("收到服务器消息:" + arguments);
     });
 }
 
@@ -36,7 +40,9 @@ function Hello() {
  * @param next
  */
 Hello.prototype.handle = function (msg, next) {
-
+    this.client.socket.send(0, JSON.stringify({"id": "1"}), "utf8", function () {
+        console.log("发送消息完成!");
+    });
     next(null, "hello newbeely!");
 }
 
