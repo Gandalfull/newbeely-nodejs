@@ -34,3 +34,11 @@
 
     newbeely init
     newbeely init project-name
+    
+### Components describe
+
+    httpComponent : https://github.com/Gandalfull/newbeely-nodejs/blob/master/lib/components/httpComponent/ReadMe.MD
+    expressComponent : https://github.com/Gandalfull/newbeely-nodejs/blob/master/lib/components/expressComponent/ReadMe.MD
+    mongooseComponent : https://github.com/Gandalfull/newbeely-nodejs/blob/master/lib/components/mongooseComponent/ReadMe.MD
+    mongooseRedisComponent : https://github.com/Gandalfull/newbeely-nodejs/blob/master/lib/components/mongooseRedisCacheComponent/ReadMe.MD
+    redisComponent : https://github.com/Gandalfull/newbeely-nodejs/blob/master/lib/components/redisComponent/ReadMe.MD
