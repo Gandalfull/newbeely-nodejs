@@ -11,7 +11,7 @@ var App = require('newbeely-nodejs'),
 App.start(function () {
     /// 加载配置文件
     App.configure("development|production", function () {
-        var expressComponent = Bearcat.getBean("application").getComponent(i);
+        var expressComponent = Bearcat.getBean("application").getComponent("YourName");
         var express = expressComponent.express;
 
         /// 固定使用views为 工作目录+"/views"
