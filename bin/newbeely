@@ -19,7 +19,8 @@ var SupportComponentIndex = {
     '5': 'redisComponent',
     '6': 'rpcComponent(un-support)',
     '7': 'websocketComponent(un-support)',
-    '8': 'socketioComponent(un-support)'
+    '8': 'socketioComponent(un-support)',
+    '9': 'udpComponent'
 };
 
 program.version(require('../package.json').version);
