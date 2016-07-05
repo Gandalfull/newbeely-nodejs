@@ -2,6 +2,9 @@
   "httpComponent": {
     "bean":"httpComponent","host": "localhost", "port": 18500, "ssl": false, "protocol": "", "method": "get|post"
   },
+  "udpComponent":{
+    "bean":"udpComponent", "host":"localhost","port":60090
+  },
   "expressComponent": {
     "bean":"expressComponent","host": "localhost", "port": 18600, "ssl": false, "protocol": "", "method": "get|post"
   },
