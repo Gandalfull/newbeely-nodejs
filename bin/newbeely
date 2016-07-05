@@ -227,16 +227,17 @@ function InitComponent(ph, components) {
         if( component == 'udpComponent' ){
             mkdir(path.join(ph, 'app', name, 'handle'), function () {
                 copy_file(path.join(__dirname, '../template/udp.route.template'), path.join(ph, 'app', name, 'handle', 'template.js'));
+                cb();
             });
         }
 
         if (component == 'expressComponent') {
+            fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/app.express')).toString());
+
             mkdir(path.join(ph, 'app', name, 'routes'), function () {
                 copy_file(path.join(__dirname, '../template/express.route.template'), path.join(ph, 'app', name, 'routes', 'hello.js'));
+                cb();
             });
-
-            fs.writeFileSync(path.join(ph, 'app.js'), fs.readFileSync(path.join(__dirname, '../template/app.express')).toString());
-            cb();
         }
 
         if (component == 'mongooseComponent' || component == 'mongooseRedisCacheComponent') {
